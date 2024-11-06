@@ -1,5 +1,4 @@
 <?php
-$page_title = "CodeLuck - Dashboard";
 session_start();
 
 if (isset($_SESSION['account'])) {
@@ -9,7 +8,7 @@ if (isset($_SESSION['account'])) {
 } else {
     header('location: ../account/loginwcss.php');
 }
-
+$page_title = "CodeLuck - products";
 require_once '../includes/_head.php';
 ?>
 

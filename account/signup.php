@@ -1,5 +1,5 @@
 <?php
-$page_title = "CodeLuck - Login";
+$page_title = "CodeLuck - Sign Up";
 include_once "../includes/_head.php";
 require_once '../tools/functions.php';
 require_once '../classes/account.class.php';
@@ -8,24 +8,41 @@ session_start();
 
 $username = $password = '';
 $accountObj = new Account();
-$loginErr = '';
+$first_name = $last_name = $username = $password = $role = '';
+$first_nameErr = $last_nameErr = $usernameErr = $passwordErr = $roleErr = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $first_name = clean_input(($_POST['firstname']));
+    $last_name = clean_input(($_POST['lastname']));
+    $role = clean_input(($_POST['role']));
     $username = clean_input(($_POST['username']));
     $password = clean_input($_POST['password']);
 
-    if ($accountObj->login($username, $password)) {
-        $data = $accountObj->fetch($username);
-        $_SESSION['account'] = $data;
-        header('location: ../admin/dashboard.php');
-    } else {
-        $loginErr = 'Invalid username/password';
+    if (empty($first_name)) {
+        $first_nameErr = "First name is Required!";
     }
-} else {
-    if (isset($_SESSION['account'])) {
-        if ($_SESSION['account']['is_staff']) {
-            header('location: ../admin/dashboard.php');
-        }
+    if (empty($last_name)) {
+        $last_nameErr = "Last name is Required!";
+    }
+    if (empty($role)) {
+        $roleErr = "Role is Required!";
+    }
+    if (empty($username)) {
+        $usernameErr = "username is Required!";
+    } elseif ($accountObj->usernameExist($username)) {
+        $usernameErr = "username already taken!";
+    }
+    if (empty($password)) {
+        $passwordErr = "password is Required!";
+    }
+    if (empty($first_nameErr) && empty($last_nameErr) && empty($roleErr) && empty($usernameErr) && empty($passwordErr)) {
+        $accountObj->first_name = $first_name;
+        $accountObj->last_name = $last_name;
+        $accountObj->role = $role;
+        $accountObj->username = $username;
+        $accountObj->password = $password;
+        $accountObj->add();
+        header("location: loginwcss.php");
     }
 }
 ?>
@@ -138,28 +155,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body class="d-flex align-items-center py-4 bg-body-tertiary">
 
     <main class="form-signin w-100 m-auto">
-        <form action="loginwcss.php" method="post">
+        <form action="signup.php" method="post">
             <img class="mb-4" src="../img/box.png" alt="" width="72" height="57">
 
-            <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
+            <h1 class="h3 mb-3 fw-normal">Sign Up</h1>
 
             <div class="form-floating">
-                <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+                <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Firstname" value="<?= $first_name ?>">
+                <label for="firstname">First name</label>
+                <p class="text-danger"><?= $first_nameErr ?></p>
+
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Lastname" value="<?= $last_name ?>">
+                <label for="lastname">Last name</label>
+                <p class="text-danger"><?= $last_nameErr ?></p>
+
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="role" name="role" placeholder="Role" value="<?= $role ?>">
+                <label for="role">Role</label>
+                <p class="text-danger"><?= $roleErr ?></p>
+
+            </div>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" value="<?= $username ?>">
                 <label for="username">Username</label>
+                <p class="text-danger"><?= $usernameErr ?></p>
+
             </div>
             <div class="form-floating">
                 <input type="password" class="form-control" id="password" name="password" placeholder="Password">
                 <label for="password">Password</label>
+                <p class="text-danger"><?= $passwordErr ?></p>
+
             </div>
-            <p class="text-danger"><?= $loginErr ?></p>
-            <div class="form-check text-start my-3">
-                <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault">
-                <label class="form-check-label" for="flexCheckDefault">
-                    Remember me
-                </label>
-            </div>
-            <button class="btn btn-primary w-100 py-2" type="submit">Sign in</button>
-            <a href="signup.php" class="btn btn-primary w-100 py-2 mt-2">Sign Up</a>
+            <button class="btn btn-primary w-100 py-2" type="submit">Sign Up</button>
             <p class="mt-5 mb-3 text-body-secondary">&copy; 2024–2025</p>
         </form>
     </main>
