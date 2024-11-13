@@ -171,9 +171,9 @@ $(document).ready(function () {
         fetchCategories(); // Load categories for the select input
 
         // Event listener for the add product form submission
-        $("#form-edit-product").on("submit", function (e) {
+        $("#form-add-product").on("submit", function (e) {
           e.preventDefault(); // Prevent default form submission
-          updateProduct(); // Call function to save product
+          saveProduct(); // Call function to save product
         });
       },
     });
