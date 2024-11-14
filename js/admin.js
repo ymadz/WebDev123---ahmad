@@ -126,10 +126,16 @@ $(document).ready(function () {
           addProduct(); // Call function to add product
         });
 
-        // Event listener for adding a product
+        // Event listener for editing a product
         $(".edit-product").on("click", function (e) {
           e.preventDefault(); // Prevent default behavior
           editProduct(this.dataset.id); // Call function to add product
+        });
+
+        // Event listener for adding stocks
+        $(".add-stock").on("click", function (e) {
+          e.preventDefault(); // Prevent default behavior
+          addStock(this.dataset.id); // Call function to add product
         });
       },
     });
@@ -318,3 +324,61 @@ $(document).ready(function () {
     });
   }
 });
+
+// Function to show the stock in/out modal
+function addStock(productId) {
+  $.ajax({
+      type: "GET",
+      url: "../stocks/stock-in-out.html",
+      dataType: "html",
+      success: function (view) {
+          $(".modal-container").html(view); // Load the modal view
+          $("#stockModal").modal("show"); // Show the modal
+
+          // Handle the visibility of the reason field
+          $("input[name='status']").on("change", function () {
+              if (this.value === "out") {
+                  $("#reasonField").removeClass("d-none");
+              } else {
+                  $("#reasonField").addClass("d-none");
+              }
+          });
+
+          // Event listener for the stock form submission
+          $("#form-stock").on("submit", function (e) {
+              e.preventDefault();
+              saveStock(productId); // Call function to save stock in/out
+          });
+      },
+  });
+}
+
+// Function to save stock in/out data
+function saveStock(productId) {
+  $.ajax({
+      type: "POST",
+      url: `../stocks/stocks.php?id=${productId}`,
+      data: $("#form-stock").serialize(),
+      dataType: "json",
+      success: function (response) {
+          if (response.status === "error") {
+              // Display validation errors
+              if (response.quantityErr) {
+                  $("#quantity").addClass("is-invalid");
+                  $("#quantity").next(".invalid-feedback").text(response.quantityErr).show();
+              }
+              if (response.statusErr) {
+                  $("input[name='status']").addClass("is-invalid");
+                  $("input[name='status']").next(".invalid-feedback").text(response.statusErr).show();
+              }
+              if (response.reasonErr) {
+                  $("#reason").addClass("is-invalid");
+                  $("#reason").next(".invalid-feedback").text(response.reasonErr).show();
+              }
+          } else if (response.status === "success") {
+              $("#stockModal").modal("hide"); // Hide the modal on success
+              viewProducts(); // Refresh the products view to reflect the new stock
+          }
+      },
+  });
+}
