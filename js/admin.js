@@ -323,9 +323,8 @@ $(document).ready(function () {
       },
     });
   }
-});
 
-// Function to show the stock in/out modal
+  // Function to show the stock in/out modal
 function addStock(productId) {
   $.ajax({
       type: "GET",
@@ -382,3 +381,6 @@ function saveStock(productId) {
       },
   });
 }
+
+});
+
